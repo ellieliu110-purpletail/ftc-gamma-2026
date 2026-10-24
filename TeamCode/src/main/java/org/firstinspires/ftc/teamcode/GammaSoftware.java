@@ -46,13 +46,10 @@ public class GammaSoftware extends LinearOpMode
     private void doDriving() {
         // Forward/backward
         double y = -gamepad1.left_stick_y;
-
         // Strafe left/right
         double x = gamepad1.left_stick_x * 1.1;
-
         // Rotate
         double rx = gamepad1.right_stick_x;
-
         // Prevent any motor power from exceeding 1.0
         double denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1);
 
@@ -61,7 +58,6 @@ public class GammaSoftware extends LinearOpMode
         double backLeftPower = (y - x + rx) / denominator;
         double frontRightPower = (y - x - rx) / denominator;
         double backRightPower = (y + x - rx) / denominator;
-
         frontLeftMotor.setPower(frontLeftPower);
         backLeftMotor.setPower(backLeftPower);
         frontRightMotor.setPower(frontRightPower);
@@ -83,7 +79,6 @@ public class GammaSoftware extends LinearOpMode
         } else {
             intakeMotor.setPower(0.0);
         }
-
         // B moves launcher
         if (gamepad1.b) {
             launcherMotor.setPower(1.0);
@@ -92,11 +87,11 @@ public class GammaSoftware extends LinearOpMode
             launcherMotor.setPower(0.0);
         }
 
-        // Buffer goes up when bumper is press, Buffer goes down when rotation is finished
+        // Buffer goes up when bumper is pressed
         if (gamepad1.rightBumperWasPressed()) {
             buffer = buffer + 1;
         }
-
+        //  Buffer goes down when rotation is finished
         if (buffer > 0) {
             buffer = buffer - 1;
             intakeServo.setPosition(1);
@@ -104,6 +99,7 @@ public class GammaSoftware extends LinearOpMode
             intakeServo.setPosition(0.5);
             telemetry.addData("Working!", "Working_Right_Bumper");
         }
+
         telemetry.update();
     }
 
