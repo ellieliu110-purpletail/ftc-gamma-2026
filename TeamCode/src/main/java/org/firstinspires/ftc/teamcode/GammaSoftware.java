@@ -55,6 +55,8 @@ public class GammaSoftware extends LinearOpMode
 
         // Prevent any motor power from exceeding 1.0
         double denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1);
+
+        // Calculate motor powers
         double frontLeftPower = (y + x + rx) / denominator;
         double backLeftPower = (y - x + rx) / denominator;
         double frontRightPower = (y - x - rx) / denominator;
