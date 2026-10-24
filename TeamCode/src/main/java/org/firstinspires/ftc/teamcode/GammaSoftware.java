@@ -90,7 +90,7 @@ public class GammaSoftware extends LinearOpMode
             launcherMotor.setPower(0.0);
         }
 
-        // When bumper is pressed var goes up, when
+        // When bumper is pressed var goes up and do rotation 1 more time
         if (gamepad1.rightBumperWasPressed()) {
             buffer = buffer + 1;
         }
