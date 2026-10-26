@@ -81,7 +81,7 @@ public class GammaSoftware extends LinearOpMode
         }
         // B moves launcher
         if (gamepad1.b) {
-            launcherMotor.setPower(1.0);
+            launcherMotor.setPower(0.7);
             telemetry.addData("Motor", "Working_B");
         } else {
             launcherMotor.setPower(0.0);
