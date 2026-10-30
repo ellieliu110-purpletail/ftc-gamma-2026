@@ -79,15 +79,9 @@ public class GammaSoftware extends LinearOpMode
 
     private void doIntake() {
         // right bumper moves ball in, left trigger moves balls out
-        if (gamepad1.right_trigger > 0.1) {
-            intakeMotor.setPower(1.0);
-            telemetry.addData("Working!", "Working_Left_Bumper");
-        } else if (gamepad1.left_trigger > 0.1) {
-            intakeMotor.setPower(-1.0);
-            telemetry.addData("Working!", "Working_Left_Trigger");
-        } else {
-            intakeMotor.setPower(0.0);
-        }
+        double inSpeed = gamepad1.right_trigger;
+        inSpeed = inSpeed - gamepad1.left_trigger;
+        intakeMotor.setPower(inSpeed);
         // X increases the speed of the launcher motor
         if (gamepad1.dpad_up) {
             launcherMotorSpeed = launcherMotorSpeed + 0.05;
