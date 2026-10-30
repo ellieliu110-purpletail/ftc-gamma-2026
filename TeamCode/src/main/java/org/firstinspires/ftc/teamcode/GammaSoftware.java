@@ -4,7 +4,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
 
-@TeleOp(name = "GammaSoftwareFixed", group = "Gamma")
+@TeleOp(name = "GammaSoftware", group = "Gamma")
 public class GammaSoftware extends LinearOpMode
 {
     private DcMotor frontLeftMotor;
@@ -46,12 +46,14 @@ public class GammaSoftware extends LinearOpMode
 
     private void doDriving() {
         // Forward/backward
-        double y = gamepad2.left_trigger;
-        y = y - gamepad2.right_trigger;
+        double y = -gamepad1.left_stick_y;
+
         // Strafe left/right
-        double x = gamepad2.left_stick_x * 1.1;
+        double x = gamepad1.left_stick_x * 1.1;
+
         // Rotate
-        double rx = gamepad2.right_stick_x;
+        double rx = gamepad1.right_stick_x;
+
         // Prevent any motor power from exceeding 1.0
         double denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1);
 
@@ -60,6 +62,7 @@ public class GammaSoftware extends LinearOpMode
         double backLeftPower = (y - x + rx) / denominator;
         double frontRightPower = (y - x - rx) / denominator;
         double backRightPower = (y + x - rx) / denominator;
+
         frontLeftMotor.setPower(frontLeftPower);
         backLeftMotor.setPower(backLeftPower);
         frontRightMotor.setPower(frontRightPower);
