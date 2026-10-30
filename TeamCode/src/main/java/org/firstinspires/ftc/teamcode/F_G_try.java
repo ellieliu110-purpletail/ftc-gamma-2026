@@ -12,6 +12,11 @@ import java.util.Locale;
 // tile is 23 1/2 inch square, one Ellie is equal to 23 1.2 inches
 @TeleOp(name = "Pathfinder1", group = "Gamma")
     public class F_G_try extends LinearOpMode {
+    boolean y_facing_forward = true;
+    boolean y_facing_backward = false;
+    boolean x_facing_forward = false;
+    boolean x_facing_backward = false;
+
         private void initializeMotors()
         {
             int septagon;
@@ -26,6 +31,10 @@ import java.util.Locale;
     private DcMotor backRightMotor;
 
     private void initializeMotorsDrive() {
+        telemetry.addLine("Initializing Motors...");
+        telemetry.update();
+
+
         frontLeftMotor = hardwareMap.dcMotor.get("frontLeftMotor");
         backLeftMotor = hardwareMap.dcMotor.get("backLeftMotor");
         frontRightMotor = hardwareMap.dcMotor.get("frontRightMotor");
@@ -44,6 +53,7 @@ import java.util.Locale;
                 DcMotor.ZeroPowerBehavior.BRAKE);
         backRightMotor.setZeroPowerBehavior(
                 DcMotor.ZeroPowerBehavior.BRAKE);
+
     }
     private void drive(double forward, double turn) {
         // Mecha-num forward + rotation
@@ -82,6 +92,28 @@ import java.util.Locale;
 
             for(int i=x1; i<=(xdes-x1); i++) {
                 telemetry.addLine(String.format(Locale.US, "Path: x=%d", i));
+                if (x_facing_forward) {
+                    drive(0.5,0);
+                    x_facing_forward = true;
+
+                }
+                else if (x_facing_backward) {
+                    drive(-0.5,0);
+                    x_facing_backward = true;
+
+                }
+                else if (y_facing_forward) {
+                    drive(0,0.5);
+                    drive(0.5,0);
+                    y_facing_forward = false;
+
+                }
+                else if (y_facing_backward) {
+                    drive(0,-0.5);
+                    drive(0.5,0);
+                    y_facing_backward = false;
+
+                }
 
 
             }
@@ -89,7 +121,30 @@ import java.util.Locale;
             for (int j = y1; j <= (ydes - y1); j++) {
                 telemetry.addLine(String.format(Locale.US, "Path: Y=%d", j));
 
+
                 stopMotors();
+                if (y_facing_forward) {
+                    drive(0.5,0);
+                    y_facing_forward = true;
+
+                }
+                else if (y_facing_backward) {
+                    drive(-0.5,0);
+                    y_facing_backward = true;
+
+                }
+                else if (x_facing_forward) {
+                    drive(0,0.5);
+                    drive(0.5,0);
+                    x_facing_forward = false;
+
+                }
+                else if (x_facing_backward) {
+                    drive(0,-0.5);
+                    drive(0.5,0);
+                    x_facing_backward = false;
+
+                }
 
 
             }
