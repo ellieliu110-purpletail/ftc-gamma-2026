@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Servo;
 
 @TeleOp(name = "GammaSoftware", group = "Gamma")
@@ -12,18 +13,21 @@ public class GammaSoftware extends LinearOpMode
     private DcMotor frontRightMotor;
     private DcMotor backRightMotor;
     private DcMotor intakeMotor;
-    private DcMotor launcherMotor;
+    private DcMotorEx launcherMotor;
     private Servo intakeServo;
     private int buffer = 0;
-    private double launcherMotorSpeed = 0.5;
+    private double launcherVelocity = 1200.0; // Target velocity in ticks/sec
+    private boolean lastDpadUp = false;
+    private boolean lastDpadDown = false;
 
     private void initializeMotors()
     {
-        launcherMotor = hardwareMap.dcMotor.get("launcherMotor");
+        launcherMotor = hardwareMap.get(DcMotorEx.class, "launcherMotor");
         intakeMotor = hardwareMap.dcMotor.get("intakeMotor");
         intakeServo = hardwareMap.get(Servo.class, "intakeServo");
         launcherMotor.setDirection(DcMotor.Direction.FORWARD);
         launcherMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        launcherMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         intakeMotor.setDirection(DcMotor.Direction.FORWARD);
         intakeMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         frontLeftMotor = hardwareMap.dcMotor.get("frontLeftMotor");
@@ -74,39 +78,43 @@ public class GammaSoftware extends LinearOpMode
 
         telemetry.addData("Front Right", frontRightPower);
         telemetry.addData("Back Right", backRightPower);
-        telemetry.addData("Launcher Motor Speed", launcherMotorSpeed);
+        telemetry.addData("Launcher Target Velocity", launcherVelocity);
+        telemetry.addData("Launcher Actual Velocity", launcherMotor.getVelocity());
     }
 
     private void doIntake() {
-        // right bumper moves ball in, left trigger moves balls out
-        double inSpeed = gamepad1.right_trigger;
-        inSpeed = inSpeed - gamepad1.left_trigger;
+        // Right trigger moves ball in, left trigger moves ball out
+        double inSpeed = gamepad1.right_trigger - gamepad1.left_trigger;
         intakeMotor.setPower(inSpeed);
-        // X increases the speed of the launcher motor
-        if (gamepad1.dpad_up) {
-            launcherMotorSpeed = launcherMotorSpeed + 0.05;
+        if (inSpeed > 0.1) {
+            telemetry.addData("Working!", "Working_Right_Trigger");
+        } else if (inSpeed < -0.1) {
+            telemetry.addData("Working!", "Working_Left_Trigger");
         }
 
-        // Y decreases the speed of the launcher motor
-        if (gamepad1.dpad_down) {
-            launcherMotorSpeed = launcherMotorSpeed - 0.05;
+        // DPAD Up increases target velocity of the launcher motor on single press
+        if (gamepad1.dpad_up && !lastDpadUp) {
+            launcherVelocity = launcherVelocity + 100.0;
+        }
+        lastDpadUp = gamepad1.dpad_up;
+
+        // DPAD Down decreases target velocity of the launcher motor on single press
+        if (gamepad1.dpad_down && !lastDpadDown) {
+            launcherVelocity = launcherVelocity - 100.0;
+        }
+        lastDpadDown = gamepad1.dpad_down;
+
+        // Sets target velocity to 0 if it is less than 0
+        if (launcherVelocity < 0.0){
+            launcherVelocity = 0.0;
         }
 
-        // Sets the speed of the launcher motor to 0 if it is less than 0
-        if (launcherMotorSpeed < 0.0){
-            launcherMotorSpeed = 0.0;
-        }
-        // Sets the speed of the launcher motor to 1 if it is greater than 1
-        if (launcherMotorSpeed > 1.0){
-            launcherMotorSpeed = 1.0;
-        }
-
-        // A moves launcher
+        // A moves launcher at target velocity
         if (gamepad1.a) {
-            launcherMotor.setPower(launcherMotorSpeed);
+            launcherMotor.setVelocity(launcherVelocity);
             telemetry.addData("Motor", "Working_B");
         } else {
-            launcherMotor.setPower(0.0);
+            launcherMotor.setVelocity(0.0);
         }
 
         // Buffer goes up when bumper is pressed
