@@ -14,18 +14,25 @@ public class GammaSoftware extends LinearOpMode
     private DcMotor intakeMotor;
     private DcMotor launcherMotor;
     private Servo intakeServo;
+    private DcMotor intakeMotorTwo;
     private int buffer = 0;
+    private double inSpeed2 = 0;
     private double launcherMotorSpeed = 0.5;
 
     private void initializeMotors()
     {
         launcherMotor = hardwareMap.dcMotor.get("launcherMotor");
         intakeMotor = hardwareMap.dcMotor.get("intakeMotor");
+        intakeMotorTwo = hardwareMap.dcMotor.get("intakeMotorTwo");
         intakeServo = hardwareMap.get(Servo.class, "intakeServo");
+
         launcherMotor.setDirection(DcMotor.Direction.FORWARD);
         launcherMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         intakeMotor.setDirection(DcMotor.Direction.FORWARD);
         intakeMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        intakeMotorTwo.setDirection(DcMotor.Direction.FORWARD);
+        intakeMotorTwo.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+
         frontLeftMotor = hardwareMap.dcMotor.get("frontLeftMotor");
         backLeftMotor = hardwareMap.dcMotor.get("backLeftMotor");
         frontRightMotor = hardwareMap.dcMotor.get("frontRightMotor");
@@ -71,7 +78,6 @@ public class GammaSoftware extends LinearOpMode
         telemetry.addData("Left Stick Y", gamepad2.left_stick_y);
         telemetry.addData("Front Left", frontLeftPower);
         telemetry.addData("Back Left", backLeftPower);
-
         telemetry.addData("Front Right", frontRightPower);
         telemetry.addData("Back Right", backRightPower);
         telemetry.addData("Launcher Motor Speed", launcherMotorSpeed);
@@ -79,27 +85,27 @@ public class GammaSoftware extends LinearOpMode
 
     private void doIntake() {
         // right bumper moves ball in, left trigger moves balls out
-        double inSpeed = gamepad1.right_trigger;
-        inSpeed = inSpeed - gamepad1.left_trigger;
+        double inSpeed = gamepad1.right_trigger - gamepad1.left_trigger;
+        if (gamepad1.right_bumper) {
+            inSpeed2 = 1.0;
+        } else if (gamepad1.left_bumper) {
+            inSpeed2 = -1.0;
+        } else {
+            inSpeed2 = 0;
+        }
         intakeMotor.setPower(inSpeed);
-        // X increases the speed of the launcher motor
+        intakeMotorTwo.setPower(inSpeed2);
+
+        // Dpad up increases the speed of the launcher motor
         if (gamepad1.dpad_up) {
             launcherMotorSpeed = launcherMotorSpeed + 0.05;
         }
-
-        // Y decreases the speed of the launcher motor
+        // Dpad down decreases the speed of the launcher motor
         if (gamepad1.dpad_down) {
             launcherMotorSpeed = launcherMotorSpeed - 0.05;
         }
 
-        // Sets the speed of the launcher motor to 0 if it is less than 0
-        if (launcherMotorSpeed < 0.0){
-            launcherMotorSpeed = 0.0;
-        }
-        // Sets the speed of the launcher motor to 1 if it is greater than 1
-        if (launcherMotorSpeed > 1.0){
-            launcherMotorSpeed = 1.0;
-        }
+        launcherMotorSpeed = Math.max(0.0, Math.min(1.0, launcherMotorSpeed));
 
         // A moves launcher
         if (gamepad1.a) {
