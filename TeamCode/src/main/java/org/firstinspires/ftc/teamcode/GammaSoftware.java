@@ -15,7 +15,7 @@ public class GammaSoftware extends LinearOpMode
     private DcMotor launcherMotor;
     private Servo intakeServo;
     private int buffer = 0;
-    private double launcherMotorSpeed = 0.5;
+    private double launcherMotorSpeed = 2;
 
     private void initializeMotors()
     {
