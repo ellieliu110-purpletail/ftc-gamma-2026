@@ -3,6 +3,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 
 @TeleOp(name = "GammaSoftware", group = "Gamma")
@@ -13,10 +14,11 @@ public class GammaSoftware extends LinearOpMode
     private DcMotor frontRightMotor;
     private DcMotor backRightMotor;
     private DcMotor intakeMotor;
+    private DcMotor intakeMotor2;
     private DcMotorEx launcherMotor;
     private Servo intakeServo;
     private int buffer = 0;
-    private double launcherVelocity = 1200.0; // Target velocity in ticks/sec
+    private double launcherVelocity = 100.0; // Target velocity in ticks/sec
     private boolean lastDpadUp = false;
     private boolean lastDpadDown = false;
 
@@ -24,12 +26,15 @@ public class GammaSoftware extends LinearOpMode
     {
         launcherMotor = hardwareMap.get(DcMotorEx.class, "launcherMotor");
         intakeMotor = hardwareMap.dcMotor.get("intakeMotor");
+        intakeMotor2 = hardwareMap.dcMotor.get("intakeMotor2");
         intakeServo = hardwareMap.get(Servo.class, "intakeServo");
         launcherMotor.setDirection(DcMotor.Direction.FORWARD);
         launcherMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         launcherMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         intakeMotor.setDirection(DcMotor.Direction.FORWARD);
         intakeMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        intakeMotor2.setDirection(DcMotor.Direction.REVERSE);
+        intakeMotor2.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         frontLeftMotor = hardwareMap.dcMotor.get("frontLeftMotor");
         backLeftMotor = hardwareMap.dcMotor.get("backLeftMotor");
         frontRightMotor = hardwareMap.dcMotor.get("frontRightMotor");
@@ -39,7 +44,7 @@ public class GammaSoftware extends LinearOpMode
         frontLeftMotor.setDirection(DcMotor.Direction.REVERSE);
         backLeftMotor.setDirection(DcMotor.Direction.FORWARD);
         frontRightMotor.setDirection(DcMotor.Direction.FORWARD);
-        backRightMotor.setDirection(DcMotor.Direction.REVERSE);
+        backRightMotor.setDirection(DcMotor.Direction.FORWARD);
 
         // Stop immediately when power is zero
         frontLeftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -50,13 +55,13 @@ public class GammaSoftware extends LinearOpMode
 
     private void doDriving() {
         // Forward/backward
-        double y = -gamepad1.left_stick_y;
+        double y = -gamepad2.left_stick_y;
 
         // Strafe left/right
-        double x = gamepad1.left_stick_x * 1.1;
+        double x = gamepad2.left_stick_x * 1.1;
 
         // Rotate
-        double rx = gamepad1.right_stick_x;
+        double rx = gamepad2.right_stick_x;
 
         // Prevent any motor power from exceeding 1.0
         double denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1);
@@ -72,7 +77,6 @@ public class GammaSoftware extends LinearOpMode
         frontRightMotor.setPower(frontRightPower);
         backRightMotor.setPower(backRightPower);
 
-        telemetry.addData("Left Stick Y", gamepad2.left_stick_y);
         telemetry.addData("Front Left", frontLeftPower);
         telemetry.addData("Back Left", backLeftPower);
 
@@ -92,15 +96,27 @@ public class GammaSoftware extends LinearOpMode
             telemetry.addData("Working!", "Working_Left_Trigger");
         }
 
+        if(gamepad1.x){
+            intakeMotor2.setPower(1.0);
+        } else {
+            intakeMotor2.setPower(0.0);
+        }
+
+        if(gamepad1.y){
+            intakeMotor2.setPower(-1.0);
+        } else {
+            intakeMotor2.setPower(0.0);
+        }
+
         // DPAD Up increases target velocity of the launcher motor on single press
-        if (gamepad1.dpad_up && !lastDpadUp) {
-            launcherVelocity = launcherVelocity + 100.0;
+        if (gamepad2.dpad_up && !lastDpadUp) {
+            launcherVelocity = launcherVelocity + 10.0;
         }
         lastDpadUp = gamepad1.dpad_up;
 
         // DPAD Down decreases target velocity of the launcher motor on single press
-        if (gamepad1.dpad_down && !lastDpadDown) {
-            launcherVelocity = launcherVelocity - 100.0;
+        if (gamepad2.dpad_down && !lastDpadDown) {
+            launcherVelocity = launcherVelocity - 10.0;
         }
         lastDpadDown = gamepad1.dpad_down;
 
@@ -110,7 +126,7 @@ public class GammaSoftware extends LinearOpMode
         }
 
         // A moves launcher at target velocity
-        if (gamepad1.a) {
+        if (gamepad2.a) {
             launcherMotor.setVelocity(launcherVelocity);
             telemetry.addData("Motor", "Working_B");
         } else {
