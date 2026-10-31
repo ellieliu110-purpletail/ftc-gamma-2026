@@ -18,7 +18,7 @@ public class GammaSoftware extends LinearOpMode
     private DcMotorEx launcherMotor;
     private Servo intakeServo;
     private int buffer = 0;
-    private double launcherVelocity = 100.0; // Target velocity in ticks/sec
+    private double launcherVelocity = 1400.0; // Target velocity in ticks/sec
     private boolean lastDpadUp = false;
     private boolean lastDpadDown = false;
 
@@ -29,7 +29,7 @@ public class GammaSoftware extends LinearOpMode
         intakeMotor2 = hardwareMap.dcMotor.get("intakeMotor2");
         intakeServo = hardwareMap.get(Servo.class, "intakeServo");
         launcherMotor.setDirection(DcMotor.Direction.FORWARD);
-        launcherMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        launcherMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         launcherMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         intakeMotor.setDirection(DcMotor.Direction.FORWARD);
         intakeMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
@@ -96,13 +96,9 @@ public class GammaSoftware extends LinearOpMode
             telemetry.addData("Working!", "Working_Left_Trigger");
         }
 
-        if(gamepad1.x){
-            intakeMotor2.setPower(1.0);
-        } else {
-            intakeMotor2.setPower(0.0);
-        }
-
-        if(gamepad1.y){
+        if(gamepad1.left_bumper){
+            intakeMotor2.setPower(0.1);
+        } else if(gamepad1.right_bumper){
             intakeMotor2.setPower(-1.0);
         } else {
             intakeMotor2.setPower(0.0);
@@ -110,19 +106,24 @@ public class GammaSoftware extends LinearOpMode
 
         // DPAD Up increases target velocity of the launcher motor on single press
         if (gamepad2.dpad_up && !lastDpadUp) {
-            launcherVelocity = launcherVelocity + 10.0;
+            launcherVelocity = launcherVelocity + 1.0;
         }
         lastDpadUp = gamepad1.dpad_up;
 
         // DPAD Down decreases target velocity of the launcher motor on single press
         if (gamepad2.dpad_down && !lastDpadDown) {
-            launcherVelocity = launcherVelocity - 10.0;
+            launcherVelocity = launcherVelocity - 1.0;
         }
         lastDpadDown = gamepad1.dpad_down;
 
         // Sets target velocity to 0 if it is less than 0
-        if (launcherVelocity < 0.0){
-            launcherVelocity = 0.0;
+        if (launcherVelocity < 1400.0){
+            launcherVelocity = 1400.0;
+        }
+
+        if (launcherVelocity > 1500.0){
+            launcherVelocity = 1500.0;
+
         }
 
         // A moves launcher at target velocity
@@ -133,17 +134,10 @@ public class GammaSoftware extends LinearOpMode
             launcherMotor.setVelocity(0.0);
         }
 
-        // Buffer goes up when bumper is pressed
-        if (gamepad1.bWasPressed()) {
-            buffer = buffer + 1;
-        }
-        //  Buffer goes down when rotation is finished
-        if (buffer > 0) {
-            buffer = buffer - 1;
-            intakeServo.setPosition(0.5);
-            sleep(350);
+        if (gamepad1.b) {
+            intakeServo.setPosition(1.0);
+        } else {
             intakeServo.setPosition(0.0);
-            telemetry.addData("Working!", "Working_Right_Bumper");
         }
     }
 
