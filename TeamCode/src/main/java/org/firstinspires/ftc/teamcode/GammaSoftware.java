@@ -105,13 +105,13 @@ public class GammaSoftware extends LinearOpMode
         }
 
         // DPAD Up increases target velocity of the launcher motor on single press
-        if (gamepad2.dpad_up && !lastDpadUp) {
+        if (gamepad1.dpad_up && !lastDpadUp) {
             launcherVelocity = launcherVelocity + 1.0;
         }
         lastDpadUp = gamepad1.dpad_up;
 
         // DPAD Down decreases target velocity of the launcher motor on single press
-        if (gamepad2.dpad_down && !lastDpadDown) {
+        if (gamepad1.dpad_down && !lastDpadDown) {
             launcherVelocity = launcherVelocity - 1.0;
         }
         lastDpadDown = gamepad1.dpad_down;
