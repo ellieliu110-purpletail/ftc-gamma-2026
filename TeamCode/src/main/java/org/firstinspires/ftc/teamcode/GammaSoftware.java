@@ -17,7 +17,6 @@ public class GammaSoftware extends LinearOpMode
     private DcMotor intakeMotor2;
     private DcMotorEx launcherMotor;
     private Servo intakeServo;
-    private int buffer = 0;
     private double launcherVelocity = 1400.0; // Target velocity in ticks/sec
     private boolean lastDpadUp = false;
     private boolean lastDpadDown = false;
