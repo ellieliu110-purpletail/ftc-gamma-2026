@@ -1,35 +1,46 @@
 package org.firstinspires.ftc.teamcode;
+
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Servo;
 
 @TeleOp(name = "GammaSoftware", group = "Gamma")
-public class GammaSoftware extends LinearOpMode
-{
+public class GammaSoftware extends LinearOpMode {
+
     private DcMotor frontLeftMotor;
     private DcMotor backLeftMotor;
     private DcMotor frontRightMotor;
     private DcMotor backRightMotor;
+
     private DcMotor intakeMotor;
-    private DcMotor launcherMotor;
-    private Servo intakeServo;
     private DcMotor intakeMotorTwo;
+
+    private DcMotorEx launcherMotor;
+
+    private Servo intakeServo;
+
     private int buffer = 0;
     private double inSpeed2 = 0;
-    private double launcherMotorSpeed = 0.5;
 
-    private void initializeMotors()
-    {
-        launcherMotor = hardwareMap.dcMotor.get("launcherMotor");
+    // Launcher target velocity (ticks/sec)
+    private double launcherVelocity = 1500;
+
+    private void initializeMotors() {
+
+        launcherMotor = hardwareMap.get(DcMotorEx.class, "launcherMotor");
         intakeMotor = hardwareMap.dcMotor.get("intakeMotor");
         intakeMotorTwo = hardwareMap.dcMotor.get("intakeMotorTwo");
         intakeServo = hardwareMap.get(Servo.class, "intakeServo");
 
         launcherMotor.setDirection(DcMotor.Direction.FORWARD);
         launcherMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        launcherMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
         intakeMotor.setDirection(DcMotor.Direction.FORWARD);
         intakeMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+
         intakeMotorTwo.setDirection(DcMotor.Direction.FORWARD);
         intakeMotorTwo.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
 
@@ -38,13 +49,11 @@ public class GammaSoftware extends LinearOpMode
         frontRightMotor = hardwareMap.dcMotor.get("frontRightMotor");
         backRightMotor = hardwareMap.dcMotor.get("backRightMotor");
 
-        // Reverse the left side
         frontLeftMotor.setDirection(DcMotor.Direction.REVERSE);
         backLeftMotor.setDirection(DcMotor.Direction.FORWARD);
         frontRightMotor.setDirection(DcMotor.Direction.FORWARD);
         backRightMotor.setDirection(DcMotor.Direction.REVERSE);
 
-        // Stop immediately when power is zero
         frontLeftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         backLeftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         frontRightMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -52,19 +61,14 @@ public class GammaSoftware extends LinearOpMode
     }
 
     private void doDriving() {
-        // Forward/backward
+
         double y = -gamepad1.left_stick_y;
-
-        // Strafe left/right
         double x = gamepad1.left_stick_x * 1.1;
-
-        // Rotate
         double rx = gamepad1.right_stick_x;
 
-        // Prevent any motor power from exceeding 1.0
-        double denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1);
+        double denominator =
+                Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1);
 
-        // Calculate motor powers
         double frontLeftPower = (y + x + rx) / denominator;
         double backLeftPower = (y - x + rx) / denominator;
         double frontRightPower = (y - x - rx) / denominator;
@@ -75,17 +79,20 @@ public class GammaSoftware extends LinearOpMode
         frontRightMotor.setPower(frontRightPower);
         backRightMotor.setPower(backRightPower);
 
-        telemetry.addData("Left Stick Y", gamepad2.left_stick_y);
         telemetry.addData("Front Left", frontLeftPower);
         telemetry.addData("Back Left", backLeftPower);
         telemetry.addData("Front Right", frontRightPower);
         telemetry.addData("Back Right", backRightPower);
-        telemetry.addData("Launcher Motor Speed", launcherMotorSpeed);
+
+        telemetry.addData("Target Velocity", launcherVelocity);
+        telemetry.addData("Actual Velocity", launcherMotor.getVelocity());
     }
 
     private void doIntake() {
-        // right bumper moves ball in, left trigger moves balls out
-        double inSpeed = gamepad1.right_trigger - gamepad1.left_trigger;
+
+        double inSpeed =
+                gamepad1.right_trigger - gamepad1.left_trigger;
+
         if (gamepad1.right_bumper) {
             inSpeed2 = 1.0;
         } else if (gamepad1.left_bumper) {
@@ -93,44 +100,47 @@ public class GammaSoftware extends LinearOpMode
         } else {
             inSpeed2 = 0;
         }
+
         intakeMotor.setPower(inSpeed);
         intakeMotorTwo.setPower(inSpeed2);
 
-        // Dpad up increases the speed of the launcher motor
+        // Increase velocity
         if (gamepad1.dpad_up) {
-            launcherMotorSpeed = launcherMotorSpeed + 0.05;
+            launcherVelocity += 100;
         }
-        // Dpad down decreases the speed of the launcher motor
+
+        // Decrease velocity
         if (gamepad1.dpad_down) {
-            launcherMotorSpeed = launcherMotorSpeed - 0.05;
+            launcherVelocity -= 100;
         }
 
-        launcherMotorSpeed = Math.max(0.0, Math.min(1.0, launcherMotorSpeed));
+        // Clamp velocity
+        launcherVelocity =
+                Math.max(0, Math.min(3000, launcherVelocity));
 
-        // A moves launcher
+        // Run launcher
         if (gamepad1.a) {
-            launcherMotor.setPower(launcherMotorSpeed);
-            telemetry.addData("Motor", "Working_B");
+            launcherMotor.setVelocity(launcherVelocity);
+            telemetry.addData("Motor", "Running");
         } else {
-            launcherMotor.setPower(0.0);
+            launcherMotor.setVelocity(0);
         }
 
-        // Buffer goes up when bumper is pressed
-        if (gamepad1.bWasPressed()) {
-            buffer = buffer + 1;
+        if (gamepad1.b) {
+            buffer++;
         }
-        //  Buffer goes down when rotation is finished
+
         if (buffer > 0) {
-            buffer = buffer - 1;
+            buffer--;
             intakeServo.setPosition(0.5);
             sleep(350);
             intakeServo.setPosition(0.0);
-            telemetry.addData("Working!", "Working_Right_Bumper");
+            telemetry.addData("Working!", "Servo Fired");
         }
     }
 
-    @Override public void runOpMode() throws InterruptedException {
-        // Initialize hardware ONCE
+    @Override
+    public void runOpMode() throws InterruptedException {
         initializeMotors();
         telemetry.addLine("Ready!");
         telemetry.update();
@@ -141,7 +151,5 @@ public class GammaSoftware extends LinearOpMode
             doIntake();
             telemetry.update();
         }
-
     }
-
 }
