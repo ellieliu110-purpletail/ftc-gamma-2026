@@ -49,7 +49,7 @@ public class GammaSoftware extends LinearOpMode {
 
     private void doDriving() {
         // Forward/backward
-        double y = gamepad2.left_stick_y;
+        double y = -gamepad2.left_stick_y;
 
         // Strafe left/right
         double x = gamepad2.left_stick_x * 1.1;
