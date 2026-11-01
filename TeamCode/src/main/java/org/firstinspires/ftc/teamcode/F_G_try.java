@@ -13,8 +13,8 @@ import java.util.Locale;
 public class F_G_try extends LinearOpMode {
 
     // Current robot coordinates
-    private int currentX = 2;
-    private int currentY = 1;
+    private int currentX = 6;
+    private int currentY = 3;
 
     // 1 unit = 47/2 inches = 23.5 inches
     public static final double UNIT_INCHES = 47.0 / 2.0;
@@ -98,12 +98,10 @@ public class F_G_try extends LinearOpMode {
     }
 
     private void stopMotors() {
-        if (frontLeftMotor != null && backLeftMotor != null && frontRightMotor != null && backRightMotor != null) {
-            frontLeftMotor.setPower(0.0);
-            backLeftMotor.setPower(0.0);
-            frontRightMotor.setPower(0.0);
-            backRightMotor.setPower(0.0);
-        }
+        frontLeftMotor.setPower(0.0);
+        backLeftMotor.setPower(0.0);
+        frontRightMotor.setPower(0.0);
+        backRightMotor.setPower(0.0);
     }
 
     private void updateFacingFlags() {
@@ -145,16 +143,25 @@ public class F_G_try extends LinearOpMode {
         drive(0.5, 0.0);
         sleep(units * TIME_PER_UNIT_MS);
         stopMotors();
-        sleep(200);
+        sleep(10);
     }
+
+    private void launchBalls(){
+        launcherMotor.setVelocity(launcherVelocity);
+        sleep(500);
+        intakeMotor2.setPower(1.0);
+        sleep(500);
+        launcherMotor.setVelocity(0.0);
+        intakeMotor2.setPower(0.0);
+    }
+
+
 
     private void pathfinding( int xdes, int ydes) {
         int x1 = 0;
         int y1 = 0;
         currentX = x1;
         currentY = y1;
-
-
 
         telemetry.addLine(String.format(Locale.US, "Starting path: (%d, %d) -> (%d, %d)", x1, y1, xdes, ydes));
         telemetry.update();
@@ -204,15 +211,17 @@ public class F_G_try extends LinearOpMode {
         initializeMotorsDrive();
         telemetry.addLine("Ready! Press START.");
         telemetry.update();
-
         waitForStart();
-
-        pathfinding(6, 3);
-        if (x_facing_backward) {
-            telemetry.addLine("Ready to Shoot!");
-        }
-        else if (x_facing_forward) {
-
-        }
+        telemetry.update();
+        launchBalls();
+        telemetry.addLine("Shot!");
+        telemetry.update();
+        pathfinding(3, 0);
+        turnToFacing(3);
+        x_facing_backward = true;
+        pathfinding(2,0);
+        pathfinding(0, 3);
+        launchBalls();
+        pathfinding(2, 0);
     }
 }

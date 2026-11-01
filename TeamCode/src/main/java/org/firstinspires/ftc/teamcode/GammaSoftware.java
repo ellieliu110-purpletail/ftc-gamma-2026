@@ -3,12 +3,10 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 
 @TeleOp(name = "GammaSoftware", group = "Gamma")
-public class GammaSoftware extends LinearOpMode
-{
+public class GammaSoftware extends LinearOpMode {
     private DcMotor frontLeftMotor;
     private DcMotor backLeftMotor;
     private DcMotor frontRightMotor;
@@ -17,10 +15,9 @@ public class GammaSoftware extends LinearOpMode
     private DcMotor intakeMotor2;
     private DcMotorEx launcherMotor;
     private Servo intakeServo;
-    private double launcherVelocity = 1400.0; // Target velocity in ticks/sec
+    private double launcherVelocity = 1500.0; // Target velocity in ticks/sec
 
-    private void initializeMotors()
-    {
+    private void initializeMotors() {
         launcherMotor = hardwareMap.get(DcMotorEx.class, "launcherMotor");
         intakeMotor = hardwareMap.dcMotor.get("intakeMotor");
         intakeMotor2 = hardwareMap.dcMotor.get("intakeMotor2");
@@ -52,7 +49,7 @@ public class GammaSoftware extends LinearOpMode
 
     private void doDriving() {
         // Forward/backward
-        double y = gamepad2.right_trigger - gamepad2.left_trigger;
+        double y = gamepad2.left_stick_y;
 
         // Strafe left/right
         double x = gamepad2.left_stick_x * 1.1;
@@ -107,7 +104,6 @@ public class GammaSoftware extends LinearOpMode
             launcherVelocity -= 20.0;
         }
 
-
         if (launcherVelocity > 2000){
             launcherVelocity = 2000;
         }
@@ -139,7 +135,6 @@ public class GammaSoftware extends LinearOpMode
         telemetry.addLine("Ready!");
         telemetry.update();
         waitForStart();
-
         while (opModeIsActive()) {
             doDriving();
             doIntake();
