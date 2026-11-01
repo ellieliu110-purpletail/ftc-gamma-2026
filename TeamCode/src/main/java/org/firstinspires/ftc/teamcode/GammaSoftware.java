@@ -17,10 +17,7 @@ public class GammaSoftware extends LinearOpMode
     private DcMotor intakeMotor2;
     private DcMotorEx launcherMotor;
     private Servo intakeServo;
-    private int buffer = 0;
     private double launcherVelocity = 1400.0; // Target velocity in ticks/sec
-    private boolean lastDpadUp = false;
-    private boolean lastDpadDown = false;
 
     private void initializeMotors()
     {
@@ -55,7 +52,7 @@ public class GammaSoftware extends LinearOpMode
 
     private void doDriving() {
         // Forward/backward
-        double y = -gamepad2.left_stick_y;
+        double y = gamepad2.right_trigger - gamepad2.left_trigger;
 
         // Strafe left/right
         double x = gamepad2.left_stick_x * 1.1;
@@ -79,9 +76,9 @@ public class GammaSoftware extends LinearOpMode
 
         telemetry.addData("Front Left", frontLeftPower);
         telemetry.addData("Back Left", backLeftPower);
-
         telemetry.addData("Front Right", frontRightPower);
         telemetry.addData("Back Right", backRightPower);
+        telemetry.addData("Tokyo drift", x);
         telemetry.addData("Launcher Target Velocity", launcherVelocity);
         telemetry.addData("Launcher Actual Velocity", launcherMotor.getVelocity());
     }
@@ -96,45 +93,40 @@ public class GammaSoftware extends LinearOpMode
             telemetry.addData("Working!", "Working_Left_Trigger");
         }
 
-        if(gamepad1.left_bumper){
+        if (gamepad1.left_bumper) {
             intakeMotor2.setPower(0.1);
-        } else if(gamepad1.right_bumper){
+        } else if (gamepad1.right_bumper){
             intakeMotor2.setPower(-1.0);
         } else {
             intakeMotor2.setPower(0.0);
         }
 
-        // DPAD Up increases target velocity of the launcher motor on single press
-        if (gamepad2.dpad_up && !lastDpadUp) {
-            launcherVelocity = launcherVelocity + 1.0;
-        }
-        lastDpadUp = gamepad1.dpad_up;
-
-        // DPAD Down decreases target velocity of the launcher motor on single press
-        if (gamepad2.dpad_down && !lastDpadDown) {
-            launcherVelocity = launcherVelocity - 1.0;
-        }
-        lastDpadDown = gamepad1.dpad_down;
-
-        // Sets target velocity to 0 if it is less than 0
-        if (launcherVelocity < 1400.0){
-            launcherVelocity = 1400.0;
+        if (gamepad2.dpadUpWasPressed()){
+            launcherVelocity += 20.0;
+        } if (gamepad2.dpadDownWasPressed()){
+            launcherVelocity -= 20.0;
         }
 
-        if (launcherVelocity > 1500.0){
-            launcherVelocity = 1500.0;
 
+        if (launcherVelocity > 2000){
+            launcherVelocity = 2000;
+        }
+
+        if (launcherVelocity < 1200) {
+            launcherVelocity = 1200;
         }
 
         // A moves launcher at target velocity
         if (gamepad2.a) {
             launcherMotor.setVelocity(launcherVelocity);
-            telemetry.addData("Motor", "Working_B");
+            telemetry.addData("Motor", "Working_A");
+        } else if (gamepad2.b) {
+            launcherMotor.setVelocity(-launcherVelocity);
         } else {
             launcherMotor.setVelocity(0.0);
         }
 
-        if (gamepad1.b) {
+        if (gamepad1.x) {
             intakeServo.setPosition(1.0);
         } else {
             intakeServo.setPosition(0.0);
@@ -157,3 +149,15 @@ public class GammaSoftware extends LinearOpMode
     }
 
 }
+
+// OPERATOR:
+// INTAKE: right trigger, REVERSE: left trigger,  can change if clicked half way
+// INTAKE 2: right bumper, REVERSE: left bumper, cannot change if clicked half way
+// LAUNCHER: press a to launch, REVERSE: b
+// FLOWER: hold x, release x
+// VELOCITY: dpad up to increase by 20, dpad down to decrease by 20
+
+// DRIVER:
+// FORWARD: right trigger, BACKWARDS: left trigger,  can change if clicked half way
+// TURNING: right joystick, LEFT: left, RIGHT: right
+// STRAFE, "WEIRD TURN": left joystick, LEFT: left, RIGHT: right
