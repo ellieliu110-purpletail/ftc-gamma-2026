@@ -108,8 +108,8 @@ public class GammaSoftware extends LinearOpMode
         }
 
 
-        if (launcherVelocity > 1500){
-            launcherVelocity = 1500;
+        if (launcherVelocity > 2000){
+            launcherVelocity = 2000;
         }
 
         if (launcherVelocity < 1200) {
