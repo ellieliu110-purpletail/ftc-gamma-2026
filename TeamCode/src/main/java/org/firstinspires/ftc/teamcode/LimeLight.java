@@ -64,7 +64,7 @@ public class LimeLight extends LinearOpMode {
         backRightMotor = hardwareMap.dcMotor.get("backRightMotor");
 
         // Set motor directions matching robot configuration
-        frontLeftMotor.setDirection(DcMotor.Direction.REVERSE);
+        frontLeftMotor.setDirection(DcMotor.Direction.REVERSE); //6767676767657
         backLeftMotor.setDirection(DcMotor.Direction.FORWARD);
         frontRightMotor.setDirection(DcMotor.Direction.FORWARD);
         backRightMotor.setDirection(DcMotor.Direction.REVERSE);
