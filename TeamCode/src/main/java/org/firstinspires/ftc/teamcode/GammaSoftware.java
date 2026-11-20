@@ -14,14 +14,13 @@ public class GammaSoftware extends LinearOpMode {
     private DcMotor intakeMotor;
     private DcMotor intakeMotor2;
     private DcMotorEx launcherMotor;
-    private Servo intakeServo;
     private double launcherVelocity = 1500.0; // Target velocity in ticks/sec
 
     private void initializeMotors() {
         launcherMotor = hardwareMap.get(DcMotorEx.class, "launcherMotor");
+        launcherMotor = hardwareMap.get(DcMotorEx.class, "launcherMotor2");
         intakeMotor = hardwareMap.dcMotor.get("intakeMotor");
         intakeMotor2 = hardwareMap.dcMotor.get("intakeMotor2");
-        intakeServo = hardwareMap.get(Servo.class, "intakeServo");
         launcherMotor.setDirection(DcMotor.Direction.FORWARD);
         launcherMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         launcherMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -64,7 +63,7 @@ public class GammaSoftware extends LinearOpMode {
         double frontLeftPower = (y + x + rx) / denominator;
         double backLeftPower = (y - x + rx) / denominator;
         double frontRightPower = (y - x - rx) / denominator;
-        double backRightPower = (y + x - rx) / denominator; //67676767
+        double backRightPower = (y + x - rx) / denominator;
 
         frontLeftMotor.setPower(frontLeftPower);
         backLeftMotor.setPower(backLeftPower);
@@ -122,11 +121,6 @@ public class GammaSoftware extends LinearOpMode {
             launcherMotor.setVelocity(0.0);
         }
 
-        if (gamepad1.x) {
-            intakeServo.setPosition(1.0);
-        } else {
-            intakeServo.setPosition(0.0);
-        }
     }
 
     @Override public void runOpMode() throws InterruptedException {
