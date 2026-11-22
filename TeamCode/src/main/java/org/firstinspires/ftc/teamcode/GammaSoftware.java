@@ -14,11 +14,12 @@ public class GammaSoftware extends LinearOpMode {
     private DcMotor intakeMotor;
     private DcMotor intakeMotor2;
     private DcMotorEx launcherMotor;
-    private double launcherVelocity = 1500.0; // Target velocity in ticks/sec
+    private DcMotorEx launcherMotor2;
+    private double launcherVelocity = 900; // Target velocity in ticks/sec
 
     private void initializeMotors() {
         launcherMotor = hardwareMap.get(DcMotorEx.class, "launcherMotor");
-        launcherMotor = hardwareMap.get(DcMotorEx.class, "launcherMotor2");
+        launcherMotor2 = hardwareMap.get(DcMotorEx.class, "launcherMotor2");
         intakeMotor = hardwareMap.dcMotor.get("intakeMotor");
         intakeMotor2 = hardwareMap.dcMotor.get("intakeMotor2");
         launcherMotor.setDirection(DcMotor.Direction.FORWARD);
@@ -48,10 +49,16 @@ public class GammaSoftware extends LinearOpMode {
 
     private void doDriving() {
         // Forward/backward
-        double y = -gamepad2.left_stick_y;
+        double y = 0;
+        if (Math.abs(gamepad2.left_stick_y) > 0.1) {
+            y = -gamepad2.left_stick_y;
+        } else {
+            y = gamepad2.right_trigger - gamepad2.left_trigger;
+        }
+
 
         // Strafe left/right
-        double x = gamepad2.left_stick_x * 1.1;
+        double x = gamepad2.left_stick_x;
 
         // Rotate
         double rx = gamepad2.right_stick_x;
@@ -90,16 +97,16 @@ public class GammaSoftware extends LinearOpMode {
         }
 
         if (gamepad1.left_bumper) {
-            intakeMotor2.setPower(0.1);
+            intakeMotor2.setPower(1);
         } else if (gamepad1.right_bumper){
             intakeMotor2.setPower(-1.0);
         } else {
             intakeMotor2.setPower(0.0);
         }
 
-        if (gamepad2.dpadUpWasPressed()){
+        if (gamepad1.dpadUpWasPressed()){
             launcherVelocity += 20.0;
-        } if (gamepad2.dpadDownWasPressed()){
+        } if (gamepad1.dpadDownWasPressed()){
             launcherVelocity -= 20.0;
         }
 
@@ -107,16 +114,18 @@ public class GammaSoftware extends LinearOpMode {
             launcherVelocity = 2000;
         }
 
-        if (launcherVelocity < 1200) {
-            launcherVelocity = 1200;
+        if (launcherVelocity < 0) {
+            launcherVelocity = 0;
         }
 
         // A moves launcher at target velocity
-        if (gamepad2.a) {
+        if (gamepad1.a || gamepad2.a) {
             launcherMotor.setVelocity(launcherVelocity);
+            launcherMotor2.setVelocity(launcherVelocity);
             telemetry.addData("Motor", "Working_A");
-        } else if (gamepad2.b) {
+        } else if (gamepad1.b || gamepad2.b) {
             launcherMotor.setVelocity(-launcherVelocity);
+            launcherMotor2.setVelocity(launcherVelocity);
         } else {
             launcherMotor.setVelocity(0.0);
         }
